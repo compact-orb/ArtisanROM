@@ -136,7 +136,8 @@ jobs:
 
             # Split + GitHub Release for release + test
             PART_LINKS=()
-            if [ "$BUILD_TYPE" = "release" ] || [ "$BUILD_TYPE" = "test" ]; then
+            # if [ "$BUILD_TYPE" = "release" ] || [ "$BUILD_TYPE" = "test" ]; then
+            if false; then
               echo "Splitting $FILE_NAME into 6 parts..."
               cd split_tmp
               split -d -n 6 "../$file" "${FILE_NAME}.part_"
@@ -179,7 +180,8 @@ jobs:
             fi
 
             # Generate OTA XML for release only
-            if [ "$BUILD_TYPE" = "release" ]; then
+            # if [ "$BUILD_TYPE" = "release" ]; then
+            if false; then
               echo "Generating OTA XML..."
               git clone --single-branch --branch main https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} updater_repo
               cd updater_repo
