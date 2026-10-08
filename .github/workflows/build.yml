@@ -144,7 +144,8 @@ jobs:
 
             # Split + GitHub Release for release + test
             PART_LINKS=()
-            if [ "$BUILD_TYPE" = "release" ] || [ "$BUILD_TYPE" = "test" ]; then
+            # if [ "$BUILD_TYPE" = "release" ] || [ "$BUILD_TYPE" = "test" ]; then
+            if false; then
               # GitHub caps every release asset at 2 GiB, so add parts until each one fits.
               MAX_ASSET_BYTES=$((1900 * 1024 * 1024))
               NUM_PARTS=$(( (FILE_SIZE + MAX_ASSET_BYTES - 1) / MAX_ASSET_BYTES ))
@@ -221,7 +222,8 @@ jobs:
             fi
 
             # Generate OTA XML for release only
-            if [ "$BUILD_TYPE" = "release" ]; then
+            # if [ "$BUILD_TYPE" = "release" ]; then
+            if false; then
               echo "Generating OTA XML..."
               git clone --single-branch --branch main https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }} updater_repo
               cd updater_repo
