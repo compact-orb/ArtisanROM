@@ -11,6 +11,21 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge "36" ]; then
     APPLY_PATCH "system" "system/framework/services.jar" \
         "$MODPATH/knoxguard/services.jar/0001-Disable-KnoxGuard.patch"
 
+    # Fix unlockCeStorage: Samsung's stock vold in OneUI 8.5 rejects
+    # non-empty auth tokens (Error -22). Since Weaver is disabled on Exynos 990,
+    # the framework passes a non-empty software token. Modern vold expects
+    # keys to be unlocked via Keymaster and requires an empty token.
+    # We dynamically clear the secret byte array at the start of
+    # StorageManagerService.unlockCeStorage.
+    LOG "- Fixing unlockCeStorage auth token mismatch for Exynos 990"
+    DECODE_APK "system" "system/framework/services.jar"
+    find "$APKTOOL_DIR/system/framework/services.jar" -name "StorageManagerService*.smali" -print0 | while IFS= read -r -d '' f; do
+        # Signature: (I[B)V
+        sed -i -E 's/invoke-interface \{([vp0-9]+), ([vp0-9]+), ([vp0-9]+)\}, Landroid\/os\/IVold;->unlockCeStorage\(I\[B\)V/const\/4 \3, 0x0\n    new-array \3, \3, [B\n    invoke-interface {\1, \2, \3}, Landroid\/os\/IVold;->unlockCeStorage(I[B)V/' "$f"
+        # Signature: (ILjava/lang/String;[B)V
+        sed -i -E 's/invoke-interface \{([vp0-9]+), ([vp0-9]+), ([vp0-9]+), ([vp0-9]+)\}, Landroid\/os\/IVold;->unlockCeStorage\(ILjava\/lang\/String;\[B\)V/const\/4 \4, 0x0\n    new-array \4, \4, [B\n    invoke-interface {\1, \2, \3, \4}, Landroid\/os\/IVold;->unlockCeStorage(ILjava\/lang\/String;[B)V/' "$f"
+    done
+
     SET_FLOATING_FEATURE_CONFIG \
         "SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_BLOCKCHAIN_SERVICE" --delete
     DECODE_APK "system" "system/framework/framework.jar"
